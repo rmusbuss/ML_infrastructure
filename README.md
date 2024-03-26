@@ -66,3 +66,6 @@ Open [grafana](http://localhost:3000/d/_eX4mpl3) in your browser.
 
 ### Step 6.
 Make a docker-compose file.
+
+### Step 7
+Push to git.
