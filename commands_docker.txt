@@ -1,0 +1,55 @@
+# create Dockerfile
+FROM python:3.8
+
+LABEL version="0.0.1" author="rus@name.com"
+
+WORKDIR app
+
+COPY . /app
+RUN pip install -r requirements.txt
+
+EXPOSE 8080
+
+CMD python server.py
+
+docker build -t=server:0.0.1 .
+
+
+####
+####
+# Запуск команд 
+
+
+# create network
+docker network create --driver bridge webnet
+
+# run server
+docker run \
+    --name=server \
+    -d \
+    --rm \
+    -p 8080:8080 \
+    --network webnet \
+    server:0.0.1
+
+# run prometheus
+docker run \
+    --name=prometheus \
+    -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+    -d \
+    --rm \
+    --network webnet \
+    prom/prometheus:v2.40.7
+
+# run grafana
+docker run \
+     --name=grafana \
+    -v $(pwd)/grafana/config.ini:/etc/grafana/grafana.ini \
+    -v $(pwd)/grafana/datasource.yml:/etc/grafana/provisioning/datasources/default.yaml \
+    -v $(pwd)/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/default.yaml \
+    -v $(pwd)/grafana/dashboards:/var/lib/grafana/dashboards \
+    -d \
+    --rm \
+    -p 3000:3000 \
+    --network webnet \
+     grafana/grafana:9.4.2
